@@ -1,4 +1,4 @@
-package core;
+package mailbox;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -117,8 +117,7 @@ public class MailBox {
 	 * @return
 	 */
 	public List<String> view(String follower){
-		// TODO 尚未实现
-		return null;
+		return client.lrange(String.format("user:%s:mailbox", follower), 0, -1);
 	}
 
 	/**
