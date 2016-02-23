@@ -10,6 +10,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import redis.clients.jedis.BasicCommands;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
@@ -25,13 +26,29 @@ public class MailBox {
 	private static final Logger logger = LoggerFactory.getLogger(MailBox.class);
 	public static enum MODE { STAND_ALONE, CLUSTER };
 	
+	// 每个用户的邮箱大小
+	private static int mailBoxSize = 3;
+	// pubish使用的脚本源码
+	private static String publishScript;
+	
+	{
+		// 读取publish脚本
+		BufferedReader reader = new BufferedReader(new InputStreamReader(
+				this.getClass().getClassLoader().getResourceAsStream("publish.lua")));
+		StringBuilder scriptBuilder = new StringBuilder();
+		String buf = null;
+		try {
+			while( (buf = reader.readLine()) != null ){
+				scriptBuilder.append(buf);
+			}
+		} catch (IOException e) {
+			logger.error("读取publish.lua脚本失败", e);
+		}
+		publishScript = scriptBuilder.toString();
+	}
+	
 	// redis操作接口
 	private JedisCommands client;
-	private String publishScript;
-	
-	public MailBox(){
-		this("localhost", 6379, MODE.STAND_ALONE);
-	}
 	
 	/**
 	 * 创建Mailbox操作类，与Redis建立连接
@@ -50,20 +67,10 @@ public class MailBox {
 		else{
 			client = new Jedis(host, port);
 		}
-		
-		// 读取publish脚本
-		BufferedReader reader = new BufferedReader(new InputStreamReader(
-				this.getClass().getClassLoader().getResourceAsStream("publish.lua")));
-		StringBuilder scriptBuilder = new StringBuilder();
-		String buf = null;
-		try {
-			while( (buf = reader.readLine()) != null ){
-				scriptBuilder.append(buf);
-			}
-		} catch (IOException e) {
-			logger.error("读取publish.lua脚本失败", e);
-		}
-		publishScript = scriptBuilder.toString();
+	}
+	
+	public MailBox(){
+		this("localhost", 6379, MODE.STAND_ALONE);
 	}
 
 	/**
@@ -91,17 +98,27 @@ public class MailBox {
 	 * @param event
 	 */
 	public void publish(String publisher, String event) {
-		((ScriptingCommands)client).eval(publishScript, 1, publisher, event);
+		((ScriptingCommands)client).eval(publishScript, 1, publisher, event, mailBoxSize+"");
 	}
 
 	/**
 	 * 重新加载一个用户的邮箱内容
+	 * 主要用于该用户关注或取关别的用户时刷新自己的邮箱使用
 	 * @param follower
 	 * @param events
 	 */
 	public void reload(String follower, List<String> events) {
-		// TODO Auto-generated method stub
-		
+		// TODO 尚未实现
+	}
+	
+	/**
+	 * 获取该用户邮箱内的数据
+	 * @param follower
+	 * @return
+	 */
+	public List<String> view(String follower){
+		// TODO 尚未实现
+		return null;
 	}
 
 	/**
@@ -109,6 +126,6 @@ public class MailBox {
 	 * 危险操作，应仅供开发使用
 	 */
 	public void destroy() {
-		
+		((BasicCommands)client).flushDB();
 	}
 }

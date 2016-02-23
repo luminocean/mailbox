@@ -11,7 +11,7 @@ public class Driver {
 		mailbox.follow("002", "bigv100");
 		mailbox.follow("003", "bigv100");
 		
-		mailbox.publish("bigv100", "event00124013r1");
+		mailbox.publish("bigv100", System.currentTimeMillis()+"");
 		
 		Jedis tester = new Jedis("localhost", 6379);
 		List<String> box = tester.lrange("user:001:mailbox", 0, -1);
