@@ -100,16 +100,6 @@ public class MailBox {
 	public void publish(String publisher, String event) {
 		((ScriptingCommands)client).eval(publishScript, 1, publisher, event, mailBoxSize+"");
 	}
-
-	/**
-	 * 重新加载一个用户的邮箱内容
-	 * 主要用于该用户关注或取关别的用户时刷新自己的邮箱使用
-	 * @param follower
-	 * @param events
-	 */
-	public void reload(String follower, List<String> events) {
-		// TODO 尚未实现
-	}
 	
 	/**
 	 * 获取该用户邮箱内的数据
@@ -118,6 +108,16 @@ public class MailBox {
 	 */
 	public List<String> view(String follower){
 		return client.lrange(String.format("user:%s:mailbox", follower), 0, -1);
+	}
+	
+	/**
+	 * 重新加载一个用户的邮箱内容
+	 * 主要用于该用户关注或取关别的用户时刷新自己的邮箱使用
+	 * @param follower
+	 * @param events
+	 */
+	public void reload(String follower, List<String> events) {
+		// TODO 尚未实现
 	}
 
 	/**
