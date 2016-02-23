@@ -24,11 +24,8 @@ mailbox是一个基于Redis的大规模消息分发存储工具。
 `void publish(String publisher, String event)`
 发出一个事件，该事件会发送到所有关注者的邮箱里
 
-`List<String>	view(String follower)`
+`List<String> view(String follower)`
 获取该用户邮箱内的数据
 
 `void destroy()``
 清空所有用户的邮箱 危险操作，应仅供开发使用
-
-`void reload(String follower, List<String> events)`
-重新加载一个用户的邮箱内容 主要用于该用户关注或取关别的用户时刷新自己的邮箱使用（未实现）

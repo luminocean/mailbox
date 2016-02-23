@@ -3,6 +3,7 @@ package mailbox;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -30,21 +31,11 @@ public class MailBox {
 	private static int mailBoxSize = 3;
 	// pubish使用的脚本源码
 	private static String publishScript;
-	
+	// 取关使用的脚本源码
+	private static String unfollowScript;
 	{
-		// 读取publish脚本
-		BufferedReader reader = new BufferedReader(new InputStreamReader(
-				this.getClass().getClassLoader().getResourceAsStream("publish.lua")));
-		StringBuilder scriptBuilder = new StringBuilder();
-		String buf = null;
-		try {
-			while( (buf = reader.readLine()) != null ){
-				scriptBuilder.append(buf);
-			}
-		} catch (IOException e) {
-			logger.error("读取publish.lua脚本失败", e);
-		}
-		publishScript = scriptBuilder.toString();
+		publishScript = readScript("publish.lua");
+		unfollowScript = readScript("unfollow.lua");
 	}
 	
 	// redis操作接口
@@ -89,7 +80,8 @@ public class MailBox {
 	 * @param publisher
 	 */
 	public void unfollow(String follower, String publisher) {
-		client.srem(String.format("user:%s:followers", publisher), follower);
+		// client.srem(String.format("user:%s:followers", publisher), follower);
+		((ScriptingCommands)client).eval(unfollowScript, 2, follower, publisher);
 	}
 	
 	/**
@@ -107,17 +99,11 @@ public class MailBox {
 	 * @return
 	 */
 	public List<String> view(String follower){
-		return client.lrange(String.format("user:%s:mailbox", follower), 0, -1);
-	}
-	
-	/**
-	 * 重新加载一个用户的邮箱内容
-	 * 主要用于该用户关注或取关别的用户时刷新自己的邮箱使用
-	 * @param follower
-	 * @param events
-	 */
-	public void reload(String follower, List<String> events) {
-		// TODO 尚未实现
+		// 将获取的结果set转为list，这个set是有序的
+		Set<String> set = client.zrevrange(String.format("user:%s:mailbox", follower), 0, -1);
+		List<String> list = new ArrayList<String>();
+		list.addAll(set);
+		return list;
 	}
 
 	/**
@@ -126,5 +112,21 @@ public class MailBox {
 	 */
 	public void destroy() {
 		((BasicCommands)client).flushDB();
+	}
+	
+	private static String readScript(String filePath){
+		// 读取classpath下脚本
+		BufferedReader reader = new BufferedReader(new InputStreamReader(
+				MailBox.class.getClassLoader().getResourceAsStream(filePath)));
+		StringBuilder scriptBuilder = new StringBuilder();
+		String buf = null;
+		try {
+			while( (buf = reader.readLine()) != null ){
+				scriptBuilder.append(buf);
+			}
+		} catch (IOException e) {
+			logger.error("读取" + filePath + "失败", e);
+		}
+		return scriptBuilder.toString();
 	}
 }
