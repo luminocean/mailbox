@@ -7,7 +7,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class MailBoxTest {
+public class MailBoxTest {	
 	private static MailBox mailbox;
 	
 	@BeforeClass
