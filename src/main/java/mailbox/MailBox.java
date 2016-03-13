@@ -25,7 +25,6 @@ import redis.clients.jedis.ScriptingCommands;
  */
 public class MailBox {
 	private static final Logger logger = LoggerFactory.getLogger(MailBox.class);
-	public static enum MODE { STAND_ALONE, CLUSTER };
 	
 	// 每个用户的邮箱大小
 	private static int mailBoxSize = 3;
@@ -39,29 +38,19 @@ public class MailBox {
 	}
 	
 	// redis操作接口
-	private JedisCommands client;
-	
+	private Jedis client;
+
 	/**
 	 * 创建Mailbox操作类，与Redis建立连接
 	 * @param host Redis服务所在的host地址
 	 * @param port Redis服务使用的端口
-	 * @param mode Redis服务运行模式，是单机还是集群的模式
 	 */
-	public MailBox(String host, int port, MODE mode){
-		// 集群模式
-		if( mode == MODE.CLUSTER ){
-			Set<HostAndPort> jedisClusterNodes = new HashSet<HostAndPort>();
-			jedisClusterNodes.add(new HostAndPort(host, port));
-			client = new JedisCluster(jedisClusterNodes);
-		}
-		// 单机模式
-		else{
-			client = new Jedis(host, port);
-		}
+	public MailBox(String host, int port){
+		client = new Jedis(host, port);
 	}
 	
 	public MailBox(){
-		this("localhost", 6379, MODE.STAND_ALONE);
+		client = new Jedis("localhost", 6379);
 	}
 
 	/**
@@ -80,8 +69,7 @@ public class MailBox {
 	 * @param publisher
 	 */
 	public void unfollow(String follower, String publisher) {
-		// client.srem(String.format("user:%s:followers", publisher), follower);
-		((ScriptingCommands)client).eval(unfollowScript, 2, follower, publisher);
+		client.eval(unfollowScript, 2, follower, publisher);
 	}
 	
 	/**
@@ -90,7 +78,7 @@ public class MailBox {
 	 * @param event
 	 */
 	public void publish(String publisher, String event) {
-		((ScriptingCommands)client).eval(publishScript, 1, publisher, event, mailBoxSize+"");
+		client.eval(publishScript, 1, publisher, event, mailBoxSize+"");
 	}
 	
 	/**
@@ -111,7 +99,7 @@ public class MailBox {
 	 * 危险操作，应仅供开发使用
 	 */
 	public void destroy() {
-		((BasicCommands)client).flushDB();
+		client.flushDB();
 	}
 	
 	private static String readScript(String filePath){
