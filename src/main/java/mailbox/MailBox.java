@@ -32,6 +32,7 @@ public class MailBox {
 	private static String publishScript;
 	// 取关使用的脚本源码
 	private static String unfollowScript;
+	// 获取源码
 	{
 		publishScript = readScript("publish.lua");
 		unfollowScript = readScript("unfollow.lua");
@@ -55,30 +56,30 @@ public class MailBox {
 
 	/**
 	 * 关注一个用户
-	 * @param follower
-	 * @param publisher
+	 * @param follower 关注者
+	 * @param followee 被关注者
 	 */
-	public void follow(String follower, String publisher) {
-		// 在publisher的关注者集合中加入这个follower
-		client.sadd(String.format("user:%s:followers", publisher), follower);
+	public void follow(String follower, String followee) {
+		// 在followee的关注者集合中加入这个follower
+		client.sadd(String.format("user:%s:followers", followee), follower);
 	}
 	
 	/**
 	 * 取关一个用户
-	 * @param follower
-	 * @param publisher
+	 * @param follower 关注者
+	 * @param followee 被关注者
 	 */
-	public void unfollow(String follower, String publisher) {
-		client.eval(unfollowScript, 2, follower, publisher);
+	public void unfollow(String follower, String followee) {
+		client.eval(unfollowScript, 2, follower, followee);
 	}
 	
 	/**
 	 * 发出一个事件，该事件会发送到所有关注者的邮箱里
-	 * @param publisher
+	 * @param followee
 	 * @param event
 	 */
-	public void publish(String publisher, String event) {
-		client.eval(publishScript, 1, publisher, event, mailBoxSize+"");
+	public void publish(String followee, String event) {
+		client.eval(publishScript, 1, followee, event, mailBoxSize+"");
 	}
 	
 	/**
