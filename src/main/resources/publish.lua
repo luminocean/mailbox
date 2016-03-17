@@ -1,14 +1,14 @@
 --[[ This is a script for publish routine ]]
-local followeeId = KEYS[1]
+local leaderId = KEYS[1]
 local event = ARGV[1]
 local maxSize = tonumber(ARGV[2])
 
---[[ save the event for followee him/herself, prepare for future delete operations ]]
-redis.call('LPUSH', 'user:'..followeeId..':published', event)
-redis.call('LTRIM', 'user:'..followeeId..':published', 0, maxSize-1)
+--[[ save the event for leader him/herself, prepare for future delete operations ]]
+redis.call('LPUSH', 'user:'..leaderId..':published', event)
+redis.call('LTRIM', 'user:'..leaderId..':published', 0, maxSize-1)
 
 --[[ get followers of the given user ]]
-local followers = redis.call('SMEMBERS', 'user:'..followeeId..':followers')
+local followers = redis.call('SMEMBERS', 'user:'..leaderId..':followers')
 
 --[[ iterate ]]
 for i,followerId in ipairs(followers) 

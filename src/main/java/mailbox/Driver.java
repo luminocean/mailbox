@@ -12,8 +12,8 @@ public class Driver {
 		mailbox.follow("001", "bigv200");
 
 		// 大v发内容了
-		mailbox.publish("bigv100", "I'm bigv100&"+ System.currentTimeMillis());
-		mailbox.publish("bigv200", "I'm bigv200&"+ System.currentTimeMillis());
+		mailbox.publish("bigv100", "I'm bigv100 & "+ System.currentTimeMillis());
+		mailbox.publish("bigv200", "I'm bigv200 & "+ System.currentTimeMillis());
 		
 		// 输出用户001的邮箱内容
 		List<String> box = mailbox.view("001");

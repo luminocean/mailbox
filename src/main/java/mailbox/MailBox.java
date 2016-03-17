@@ -57,29 +57,31 @@ public class MailBox {
 	/**
 	 * 关注一个用户
 	 * @param follower 关注者
-	 * @param followee 被关注者
+	 * @param leader 被关注者
 	 */
-	public void follow(String follower, String followee) {
-		// 在followee的关注者集合中加入这个follower
-		client.sadd(String.format("user:%s:followers", followee), follower);
+	public void follow(String follower, String leader) {
+		// 在leader的关注者集合中加入这个follower
+		client.sadd(String.format("user:%s:followers", leader), follower);
+		// 同样在follower的leader集合中加入该leader
+		client.sadd(String.format("user:%s:leaders", follower), leader);
 	}
 	
 	/**
 	 * 取关一个用户
 	 * @param follower 关注者
-	 * @param followee 被关注者
+	 * @param leader 被关注者
 	 */
-	public void unfollow(String follower, String followee) {
-		client.eval(unfollowScript, 2, follower, followee);
+	public void unfollow(String follower, String leader) {
+		client.eval(unfollowScript, 2, follower, leader);
 	}
 	
 	/**
 	 * 发出一个事件，该事件会发送到所有关注者的邮箱里
-	 * @param followee
+	 * @param leader
 	 * @param event
 	 */
-	public void publish(String followee, String event) {
-		client.eval(publishScript, 1, followee, event, mailBoxSize+"");
+	public void publish(String leader, String event) {
+		client.eval(publishScript, 1, leader, event, mailBoxSize+"");
 	}
 	
 	/**

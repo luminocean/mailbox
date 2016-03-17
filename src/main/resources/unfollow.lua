@@ -1,11 +1,12 @@
 local followerId = KEYS[1]
-local followeeId = KEYS[2]
+local leaderId = KEYS[2]
 
---[[ remove follower from followee's followers' set ]]
-redis.call('SREM', 'user:'..followeeId..':followers', followerId)
+--[[ remove follower from leader's followers' set and vice versa ]]
+redis.call('SREM', 'user:'..leaderId..':followers', followerId)
+redis.call('SREM', 'user:'..followerId..':leaders', leaderId)
 
---[[ now remove events of the followee from follower's mailbox ]]
-local publishedEvents = redis.call('LRANGE', 'user:'..followeeId..':published', 0, -1)
+--[[ now remove events of the leader from follower's mailbox ]]
+local publishedEvents = redis.call('LRANGE', 'user:'..leaderId..':published', 0, -1)
 local box = 'user:'..followerId..':mailbox'
 
 for i,event in ipairs(publishedEvents) 
