@@ -96,6 +96,30 @@ public class MailBox {
 		list.addAll(set);
 		return list;
 	}
+	
+	/**
+	 * 返回一个用户关注的所有其他用户
+	 * @param follower
+	 * @return
+	 */
+	public List<String> leaders(String follower){
+		Set<String> members = client.smembers(String.format("user:%s:leaders", follower));
+		List<String> list = new ArrayList<>(members.size());
+		list.addAll(members);
+		return list;
+	}
+	
+	/**
+	 * 返回一个用户的所有关注者
+	 * @param follower
+	 * @return
+	 */
+	public List<String> followers(String leader){
+		Set<String> members = client.smembers(String.format("user:%s:followers", leader));
+		List<String> list = new ArrayList<>(members.size());
+		list.addAll(members);
+		return list;
+	}
 
 	/**
 	 * 清空所有用户的邮箱

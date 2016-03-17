@@ -1,5 +1,6 @@
 package mailbox;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -57,5 +58,29 @@ public class MailBoxTest {
 		// 被取关用户的事件应该移除取关者的邮箱
 		assertEquals(1, events.size());
 		assertEquals("event5617", events.get(0));
+	}
+	
+	@Test
+	public void testLeaders() {
+		List<String> leaders = new ArrayList<>();
+		leaders.add("bigv100");
+		leaders.add("bigv200");
+		assertEquals(leaders, mailbox.leaders("001"));
+		
+		mailbox.unfollow("001", "bigv100");
+		leaders.remove(0);
+		assertEquals(leaders, mailbox.leaders("001"));
+	}
+	
+	@Test
+	public void testFollowers() {
+		List<String> followers = new ArrayList<>();
+		followers.add("001");
+		followers.add("002");
+		assertEquals(followers, mailbox.followers("bigv100"));
+		
+		mailbox.unfollow("001", "bigv100");
+		followers.remove(0);
+		assertEquals(followers, mailbox.followers("bigv100"));
 	}
 }

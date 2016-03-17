@@ -7,9 +7,21 @@ import redis.clients.jedis.Jedis;
 public class Driver {
 	public static void main(String[] args) {
 		MailBox mailbox = new MailBox();
+		mailbox.destroy();
+		
 		// 关注大v
 		mailbox.follow("001", "bigv100");
 		mailbox.follow("001", "bigv200");
+		
+		for(String leader: mailbox.leaders("001")){
+			System.out.print(leader+" ");
+		}
+		System.out.println();
+		
+		for(String follower: mailbox.followers("bigv100")){
+			System.out.print(follower+" ");
+		}
+		System.out.println();
 
 		// 大v发内容了
 		mailbox.publish("bigv100", "I'm bigv100 & "+ System.currentTimeMillis());
