@@ -1,11 +1,13 @@
 #! /usr/bin/env sh
 
-# 使用方法：首先将redis的可执行文件目录加入classpath中
-# 然后执行./redis.sh 即可启动主从两个redis服务器，以及一个sentinel用于监视运行状态（如果master服务器宕机则立即切换slave服务器顶上）
-# 执行./redis.sh会关闭这三个进程
-# 所有的中间文件都在$runtime_dir目录下
-# 需要注意的是，默认情况下6379端口是master,7379是slave。如果反过来请将.conf文件最后的一些自动生成的配置删除即可恢复
+# 说明：
+# 1. 首先将redis的可执行文件目录加入classpath中，从而可以直接执行redis-cli和redis-server命令
+# 2. 执行./redis.sh start即可启动主从两个redis服务器，以及一个sentinel用于监视运行状态（如果master服务器宕机则立即切换slave服务器顶上）
+# 3. 执行./redis.sh会关闭这三个进程
+# 4. 所有的中间文件都在$runtime_dir变量指向的目录下
 
+# 当前脚本所在的路径
+script_dir="$(dirname $0)"
 # 临时文件存放目录
 runtime_dir="/tmp/redis"
 data_dir="/tmp/redis/data"
@@ -21,13 +23,13 @@ start(){
 	mkdir -p "$data_dir"
 
 	echo "启动主redis服务器..."
-	redis-server ./master.conf
+	redis-server ${script_dir}/master.conf
 
 	echo "启动从redis服务器..."
-	redis-server ./slave.conf
+	redis-server ${script_dir}/slave.conf
 
 	echo "启动sentienl监视..."
-	redis-server ./sentinel.conf --sentinel
+	redis-server ${script_dir}/sentinel.conf --sentinel
 }
 
 stop(){
