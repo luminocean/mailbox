@@ -1,9 +1,11 @@
 package mailbox;
 
-import java.util.ArrayList;
-import java.util.List;
+import static org.junit.Assert.assertEquals;
 
-import static org.junit.Assert.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -62,25 +64,40 @@ public class MailBoxTest {
 	
 	@Test
 	public void testLeaders() {
-		List<String> leaders = new ArrayList<>();
+		// 关注测试
+		Set<String> leaders = new HashSet<>();
 		leaders.add("bigv100");
 		leaders.add("bigv200");
-		assertEquals(leaders, mailbox.leaders("001"));
 		
+		Set<String> result = new HashSet<>();
+		result.addAll(mailbox.leaders("001"));
+		assertEquals(leaders, result);
+		
+		// 取关测试
 		mailbox.unfollow("001", "bigv100");
-		leaders.remove(0);
-		assertEquals(leaders, mailbox.leaders("001"));
+		leaders.remove("bigv100");
+		
+		result.clear();
+		result.addAll(mailbox.leaders("001"));
+		assertEquals(leaders, result);
 	}
 	
 	@Test
 	public void testFollowers() {
-		List<String> followers = new ArrayList<>();
+		// 关注测试
+		Set<String> followers = new HashSet<>();
 		followers.add("001");
 		followers.add("002");
-		assertEquals(followers, mailbox.followers("bigv100"));
 		
+		Set<String> result = new HashSet<>();
+		result.addAll(mailbox.followers("bigv100"));
+		assertEquals(followers, result);
+		
+		// 取关测试
 		mailbox.unfollow("001", "bigv100");
-		followers.remove(0);
-		assertEquals(followers, mailbox.followers("bigv100"));
+		followers.remove("001");
+		result.clear();
+		result.addAll(mailbox.followers("bigv100"));
+		assertEquals(followers, result);
 	}
 }
